@@ -41,7 +41,7 @@ serviceAccount:
   customAnnotations: {}
 
 # -- Enable [leader election](https://docs.crossplane.io/latest/concepts/pods/#leader-election) for the Crossplane pod.
-leaderElection: true
+leaderElection: false
 # -- Add custom arguments to the Crossplane pod.
 args: []
 
@@ -82,7 +82,7 @@ rbacManager:
   # -- The number of RBAC Manager pod `replicas` to deploy.
   replicas: 1
   # -- Enable [leader election](https://docs.crossplane.io/latest/concepts/pods/#leader-election) for the RBAC Manager pod.
-  leaderElection: true
+  leaderElection: false
   # -- Add custom arguments to the RBAC Manager pod.
   args: []
   # -- Add `nodeSelectors` to the RBAC Manager pod deployment.
