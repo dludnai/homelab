@@ -23,7 +23,7 @@ spec:
                   spec:
                     containers:
                     - name: create-vm
-                      image: python:3.9
+                      image: python:3.10
                       command: ["python", "/scripts/create_vm.py"]
                       args: ["$(VM_NAME)", "$(VM_MEMORY)", "$(VM_CPUS)", "$(ISO_FILENAME)"]
                       env:
@@ -46,5 +46,5 @@ spec:
                         name: vbox-scripts
                     - name: iso-storage
                       persistentVolumeClaim:
-                        claimName: iso-claim  # Make sure this matches your PVC name
+                        claimName: iso-claim  
                     restartPolicy: Never
