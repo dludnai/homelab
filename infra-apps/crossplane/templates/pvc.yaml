@@ -3,9 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: iso-claim
 spec:
-  storageClassName: manual
   accessModes:
     - ReadOnlyMany
+  volumeMode: Filesystem
   resources:
     requests:
       storage: 1Gi
+  storageClassName: manual
