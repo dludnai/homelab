@@ -1,0 +1,30 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: virtualboxvms.myinfra.org
+spec:
+  compositeTypeRef:
+    apiVersion: myinfra.org/v1alpha1
+    kind: VirtualBoxVM
+  resources:
+    - name: virtualbox-vm
+      base:
+        apiVersion: tf.crossplane.io/v1alpha1
+        kind: Workspace
+        spec:
+          forProvider:
+            source: Inline
+            module: |
+              {{ .Files.Get "files/terraform-modules/virtualbox/virtualbox-vm.tf" | nindent 8 }}
+          writeConnectionSecretToRef:
+            namespace: crossplane-system
+            name: virtualbox-creds
+      patches:
+        - fromFieldPath: "spec.vmName"
+          toFieldPath: "spec.forProvider.vars[0].value"
+        - fromFieldPath: "spec.vmImage"
+          toFieldPath: "spec.forProvider.vars[1].value"
+        - fromFieldPath: "spec.vmCpus"
+          toFieldPath: "spec.forProvider.vars[2].value"
+        - fromFieldPath: "spec.vmMemory"
+          toFieldPath: "spec.forProvider.vars[3].value"
