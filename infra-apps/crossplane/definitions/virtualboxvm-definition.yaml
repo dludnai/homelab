@@ -8,26 +8,26 @@ spec:
     kind: VirtualBoxVM
     plural: virtualboxvms
   versions:
-  - name: v1alpha1
-    served: true
-    referenceable: true
-    schema:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            type: object
-            properties:
-              vmName:
-                type: string
-              vmImage:
-                type: string
-              vmCpus:
-                type: integer
-              vmMemory:
-                type: string
-            required:
-              - vmName
-              - vmImage
-              - vmCpus
-              - vmMemory
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                vmName:
+                  type: string
+                vmMemory:
+                  type: integer
+                vmCpus:
+                  type: integer
+                isoFilename:
+                  type: string
+              required:
+                - vmName
+                - vmMemory
+                - vmCpus
+                - isoFilename

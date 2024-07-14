@@ -1,9 +1,9 @@
 apiVersion: myinfra.org/v1alpha1
 kind: VirtualBoxVM
 metadata:
-  name: my-test-vm
+  name: my-ubuntu-vm
 spec:
-  vmName: "test-vm"
-  vmImage: "/isos/image.iso"
+  vmName: MasterNode
+  vmMemory: 2048
   vmCpus: 2
-  vmMemory: "1024 MB"
+  isoFilename: "ubuntu-server.iso"
