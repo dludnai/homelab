@@ -9,22 +9,42 @@ spec:
   resources:
     - name: virtualbox-vm
       base:
-        apiVersion: tf.crossplane.io/v1alpha1
-        kind: Workspace
+        apiVersion: kubernetes.crossplane.io/v1alpha1
+        kind: Object
         spec:
           forProvider:
-            source: Inline
-            module: |
-              {{ .Files.Get "files/terraform-modules/virtualbox/virtualbox-vm.tf" | nindent 8 }}
-          writeConnectionSecretToRef:
-            namespace: crossplane-system
-            name: virtualbox-creds
-      patches:
-        - fromFieldPath: "spec.vmName"
-          toFieldPath: "spec.forProvider.vars[0].value"
-        - fromFieldPath: "spec.vmImage"
-          toFieldPath: "spec.forProvider.vars[1].value"
-        - fromFieldPath: "spec.vmCpus"
-          toFieldPath: "spec.forProvider.vars[2].value"
-        - fromFieldPath: "spec.vmMemory"
-          toFieldPath: "spec.forProvider.vars[3].value"
+            manifest:
+              apiVersion: batch/v1
+              kind: Job
+              metadata:
+                generateName: create-vm-
+              spec:
+                template:
+                  spec:
+                    containers:
+                    - name: create-vm
+                      image: python:3.9
+                      command: ["python", "/scripts/create_vm.py"]
+                      args: ["$(VM_NAME)", "$(VM_MEMORY)", "$(VM_CPUS)", "$(ISO_FILENAME)"]
+                      env:
+                      - name: VM_NAME
+                        value: "{{ .composite.spec.vmName }}"
+                      - name: VM_MEMORY
+                        value: "{{ .composite.spec.vmMemory }}"
+                      - name: VM_CPUS
+                        value: "{{ .composite.spec.vmCpus }}"
+                      - name: ISO_FILENAME
+                        value: "{{ .composite.spec.isoFilename }}"
+                      volumeMounts:
+                      - name: scripts
+                        mountPath: /scripts
+                      - name: iso-storage
+                        mountPath: /data/iso
+                    volumes:
+                    - name: scripts
+                      configMap:
+                        name: vbox-scripts
+                    - name: iso-storage
+                      persistentVolumeClaim:
+                        claimName: iso-claim  # Make sure this matches your PVC name
+                    restartPolicy: Never
