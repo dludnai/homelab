@@ -171,10 +171,16 @@ podSecurityContextCrossplane: {}
 podSecurityContextRBACManager: {}
 
 # -- Add custom `volumes` to the Crossplane pod.
-extraVolumesCrossplane: {}
+extraVolumesCrossplane:
+  - name: iso-storage
+    persistentVolumeClaim:
+      claimName: iso-claim
 
 # -- Add custom `volumeMounts` to the Crossplane pod.
-extraVolumeMountsCrossplane: {}
+extraVolumeMountsCrossplane:
+  - name: iso-storage
+    mountPath: /isos
+    readOnly: true
 
 # -- To add arbitrary Kubernetes Objects during a Helm Install
 extraObjects: []

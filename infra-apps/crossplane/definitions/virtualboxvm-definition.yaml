@@ -1,0 +1,33 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: virtualboxvms.myinfra.org
+spec:
+  group: myinfra.org
+  names:
+    kind: VirtualBoxVM
+    plural: virtualboxvms
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              vmName:
+                type: string
+              vmImage:
+                type: string
+              vmCpus:
+                type: integer
+              vmMemory:
+                type: string
+            required:
+              - vmName
+              - vmImage
+              - vmCpus
+              - vmMemory

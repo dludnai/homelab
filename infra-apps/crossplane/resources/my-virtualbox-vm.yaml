@@ -1,0 +1,9 @@
+apiVersion: myinfra.org/v1alpha1
+kind: VirtualBoxVM
+metadata:
+  name: my-test-vm
+spec:
+  vmName: "test-vm"
+  vmImage: "/isos/image.iso"
+  vmCpus: 2
+  vmMemory: "1024 MB"
