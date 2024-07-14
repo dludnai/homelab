@@ -28,13 +28,21 @@ spec:
                       args: ["$(VM_NAME)", "$(VM_MEMORY)", "$(VM_CPUS)", "$(ISO_FILENAME)"]
                       env:
                       - name: VM_NAME
-                        value: "{{ .composite.spec.vmName }}"
+                        valueFrom:
+                          resourceFieldRef:
+                            fieldPath: metadata.name
                       - name: VM_MEMORY
-                        value: "{{ .composite.spec.vmMemory }}"
+                        valueFrom:
+                          resourceFieldRef:
+                            fieldPath: spec.vmMemory
                       - name: VM_CPUS
-                        value: "{{ .composite.spec.vmCpus }}"
+                        valueFrom:
+                          resourceFieldRef:
+                            fieldPath: spec.vmCpus
                       - name: ISO_FILENAME
-                        value: "{{ .composite.spec.isoFilename }}"
+                        valueFrom:
+                          resourceFieldRef:
+                            fieldPath: spec.isoFilename
                       volumeMounts:
                       - name: scripts
                         mountPath: /scripts
@@ -46,5 +54,5 @@ spec:
                         name: vbox-scripts
                     - name: iso-storage
                       persistentVolumeClaim:
-                        claimName: iso-claim  
+                        claimName: iso-claim
                     restartPolicy: Never
