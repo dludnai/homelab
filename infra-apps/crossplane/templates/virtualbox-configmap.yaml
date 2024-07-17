@@ -1,50 +1,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: vbox-scripts
+  name: vbox-api-script
   namespace: crossplane-system
 data:
-  vboxapi.py: |
-    import subprocess
-    import sys
-
-    vboxmanage_path = r'/mnt/c/Program Files/Oracle/VirtualBox/VBoxManage.exe'
-
-    def run_vbox_command(command):
-        full_command = [vboxmanage_path] + command.split()
-        result = subprocess.run(full_command, capture_output=True, text=True)
-        print(result.stdout)
-        if result.stderr:
-            print("Error:", result.stderr)
-        return result.returncode == 0
-
-    if __name__ == '__main__':
-        command = ' '.join(sys.argv[1:])
-        success = run_vbox_command(command)
-        sys.exit(0 if success else 1)
-
-  create_vm.py: |
-    import sys
-    from vboxapi import run_vbox_command
-
-    def create_vm(name, memory_mb, cpus, iso_filename):
-        minikube_iso_path = f"/data/iso/{iso_filename}"  # Adjust this path if necessary
-        if not run_vbox_command(f'createvm --name {name} --register'):
-            return False
-        if not run_vbox_command(f'modifyvm {name} --memory {memory_mb} --cpus {cpus}'):
-            return False
-        if not run_vbox_command(f'modifyvm {name} --nic1 nat'):
-            return False
-        if not run_vbox_command(f'storagectl {name} --name "SATA Controller" --add sata --controller IntelAhci'):
-            return False
-        if not run_vbox_command(f'storageattach {name} --storagectl "SATA Controller" --port 0 --device 0 --type dvddrive --medium "{minikube_iso_path}"'):
-            return False
-        print(f"VM '{name}' created successfully with ISO image attached.")
-        return True
-
-    if __name__ == '__main__':
-        if len(sys.argv) != 5:
-            print("Usage: python create_vm.py <name> <memory_mb> <cpus> <iso_filename>")
-            sys.exit(1)
-        success = create_vm(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-        sys.exit(0 if success else 1)
+  create_vm.sh: |
+    #!/bin/sh
+    curl -X POST http://172.21.192.1:5000/create_vm \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "'$VM_NAME'",
+        "memory": '$VM_MEMORY',
+        "cpus": '$VM_CPUS',
+        "iso_path": "'$ISO_PATH'"
+      }'

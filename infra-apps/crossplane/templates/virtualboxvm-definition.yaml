@@ -18,16 +18,13 @@ spec:
             spec:
               type: object
               properties:
-                vmName:
-                  type: string
-                vmMemory:
+                memory:
                   type: integer
-                vmCpus:
+                cpus:
                   type: integer
-                isoFilename:
+                isoPath:
                   type: string
               required:
-                - vmName
-                - vmMemory
-                - vmCpus
-                - isoFilename
+                - memory
+                - cpus
+                - isoPath
