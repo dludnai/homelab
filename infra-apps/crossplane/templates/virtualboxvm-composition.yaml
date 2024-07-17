@@ -9,7 +9,7 @@ spec:
   resources:
     - name: virtualbox-vm
       base:
-        apiVersion: kubernetes.crossplane.io/v1alpha1
+        apiVersion: kubernetes.crossplane.io/v1alpha2
         kind: Object
         spec:
           forProvider:
