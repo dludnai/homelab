@@ -2,6 +2,8 @@ apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: virtualboxvms.myinfra.org
+  labels:
+    provider: virtualbox
 spec:
   compositeTypeRef:
     apiVersion: myinfra.org/v1alpha1
@@ -9,7 +11,7 @@ spec:
   resources:
     - name: virtualbox-vm
       base:
-        apiVersion: kubernetes.crossplane.io/v1alpha2
+        apiVersion: kubernetes.crossplane.io/v1alpha1
         kind: Object
         spec:
           forProvider:
@@ -23,36 +25,22 @@ spec:
                   spec:
                     containers:
                     - name: create-vm
-                      image: python:3.10
-                      command: ["python", "/scripts/create_vm.py"]
-                      args: ["$(VM_NAME)", "$(VM_MEMORY)", "$(VM_CPUS)", "$(ISO_FILENAME)"]
+                      image: curlimages/curl
+                      command: ["/bin/sh", "/scripts/create_vm.sh"]
                       env:
                       - name: VM_NAME
-                        valueFrom:
-                          resourceFieldRef:
-                            fieldPath: metadata.name
+                        value: "{{ .composite.metadata.name }}"
                       - name: VM_MEMORY
-                        valueFrom:
-                          resourceFieldRef:
-                            fieldPath: spec.vmMemory
+                        value: "{{ .composite.spec.memory }}"
                       - name: VM_CPUS
-                        valueFrom:
-                          resourceFieldRef:
-                            fieldPath: spec.vmCpus
-                      - name: ISO_FILENAME
-                        valueFrom:
-                          resourceFieldRef:
-                            fieldPath: spec.isoFilename
+                        value: "{{ .composite.spec.cpus }}"
+                      - name: ISO_PATH
+                        value: "{{ .composite.spec.isoPath }}"
                       volumeMounts:
                       - name: scripts
                         mountPath: /scripts
-                      - name: iso-storage
-                        mountPath: /data/iso
+                    restartPolicy: Never
                     volumes:
                     - name: scripts
                       configMap:
-                        name: vbox-scripts
-                    - name: iso-storage
-                      persistentVolumeClaim:
-                        claimName: iso-claim
-                    restartPolicy: Never
+                        name: vbox-api-script
