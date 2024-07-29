@@ -1,7 +1,7 @@
 apiVersion: myinfra.org/v1alpha1
 kind: VirtualBoxVM
 metadata:
-  name: my-test-vm3
+  name: my-test-vm4
 spec:
   memory: 2048
   cpus: 2
