@@ -2,8 +2,6 @@ apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: virtualboxvms.myinfra.org
-  labels:
-    provider: virtualbox
 spec:
   compositeTypeRef:
     apiVersion: myinfra.org/v1alpha1
@@ -11,7 +9,7 @@ spec:
   resources:
     - name: virtualbox-vm
       base:
-        apiVersion: kubernetes.crossplane.io/v1alpha2
+        apiVersion: kubernetes.crossplane.io/v1alpha1
         kind: Object
         spec:
           forProvider:
@@ -20,27 +18,29 @@ spec:
               kind: Job
               metadata:
                 generateName: create-vm-
+                namespace: default
               spec:
                 template:
                   spec:
                     containers:
                     - name: create-vm
                       image: curlimages/curl
-                      command: ["/bin/sh", "/scripts/create_vm.sh"]
-                      env:
-                      - name: VM_NAME
-                        value: "{{ .composite.metadata.name }}"
-                      - name: VM_MEMORY
-                        value: "{{ .composite.spec.memory }}"
-                      - name: VM_CPUS
-                        value: "{{ .composite.spec.cpus }}"
-                      - name: ISO_PATH
-                        value: "{{ .composite.spec.isoPath }}"
-                      volumeMounts:
-                      - name: scripts
-                        mountPath: /scripts
+                      command: ["/bin/sh", "-c"]
+                      args:
+                      - |
+                        echo "Creating VM with the following parameters:"
+                        echo "Name: {{ .composite.metadata.name }}"
+                        echo "Memory: {{ .composite.spec.memory }} MB"
+                        echo "CPUs: {{ .composite.spec.cpus }}"
+                        echo "ISO Path: {{ .composite.spec.isoPath }}"
+                        curl -v -X POST http://172.21.192.1:5000/create_vm \
+                          -H "Content-Type: application/json" \
+                          -d '{
+                            "name": "{{ .composite.metadata.name }}",
+                            "memory": {{ .composite.spec.memory }},
+                            "cpus": {{ .composite.spec.cpus }},
+                            "iso_path": "{{ .composite.spec.isoPath }}"
+                          }' || echo "Curl command failed"
                     restartPolicy: Never
-                    volumes:
-                    - name: scripts
-                      configMap:
-                        name: vbox-api-script
+          providerConfigRef:
+            name: kubernetes-provider

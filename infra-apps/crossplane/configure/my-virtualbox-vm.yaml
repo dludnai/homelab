@@ -1,8 +1,10 @@
 apiVersion: myinfra.org/v1alpha1
 kind: VirtualBoxVM
 metadata:
-  name: my-test-vm4
+  name: my-test-vm408
 spec:
+  compositionRef:
+    name: virtualboxvms.myinfra.org
   memory: 2048
   cpus: 2
   isoPath: "ubuntu-24.04-live-server-amd64.iso"
