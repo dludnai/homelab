@@ -1,0 +1,6 @@
+url: https://charts.jetstack.io
+chart: cert-manager
+version: v1.17.2
+values:
+  crds:
+    enabled: true
