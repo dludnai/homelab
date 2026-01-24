@@ -22,8 +22,7 @@ spec:
         chart: "{{.chart}}"
         targetRevision: "{{.version}}"
         helm:
-          valuesObject: |
-            {{.values | toJson}}
+          values: '{{ .values | toJson }}'
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{ index .path.segments 2 }}'
