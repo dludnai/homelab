@@ -2,6 +2,8 @@ url: https://argoproj.github.io/argo-helm
 chart: argo-cd
 version: 7.8.13
 values:
+  global:
+    domain: argocd.129.212.193.105.nip.io
   configs:
     params:
       server.insecure: true
