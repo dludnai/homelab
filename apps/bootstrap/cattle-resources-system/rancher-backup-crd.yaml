@@ -1,0 +1,4 @@
+url: https://charts.rancher.io
+chart: rancher-backup-crd
+version: 106.0.5+up7.0.4
+values: {}

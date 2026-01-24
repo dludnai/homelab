@@ -162,6 +162,10 @@ values:
                       name = rancher2_machine_config_v2.worker.name
                     }
                   }
+
+                  machine_global_config = yamlencode({
+                    cni = "cilium"
+                  })
                 }
               }
 

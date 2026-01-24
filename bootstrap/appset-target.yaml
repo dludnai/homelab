@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: target-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/dludnai/homelab.git
+        revision: HEAD
+        files:
+          - path: "apps/target/**/*.yaml"
+  template:
+    metadata:
+      name: '{{ trimSuffix ".yaml" .path.filename }}'
+    spec:
+      project: default
+      source:
+        repoURL: "{{.url}}"
+        chart: "{{.chart}}"
+        targetRevision: "{{.version}}"
+        helm:
+          values: '{{ .values | toJson }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 2 }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
