@@ -53,15 +53,43 @@ values:
                 }
               }
 
-              variable "rancher_url" { type = string }
-              variable "rancher_token" { type = string; sensitive = true }
-              variable "do_token" { type = string; sensitive = true }
-              variable "cluster_name" { type = string }
-              variable "kubernetes_version" { type = string }
-              variable "region" { type = string }
-              variable "droplet_size" { type = string }
-              variable "cp_node_count" { type = number }
-              variable "worker_node_count" { type = number }
+              variable "rancher_url" {
+                type = string
+              }
+
+              variable "rancher_token" {
+                type      = string
+                sensitive = true
+              }
+
+              variable "do_token" {
+                type      = string
+                sensitive = true
+              }
+
+              variable "cluster_name" {
+                type = string
+              }
+
+              variable "kubernetes_version" {
+                type = string
+              }
+
+              variable "region" {
+                type = string
+              }
+
+              variable "droplet_size" {
+                type = string
+              }
+
+              variable "cp_node_count" {
+                type = number
+              }
+
+              variable "worker_node_count" {
+                type = number
+              }
 
               provider "rancher2" {
                 api_url   = var.rancher_url
