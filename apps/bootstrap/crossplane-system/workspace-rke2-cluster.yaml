@@ -11,13 +11,24 @@ values:
           providerConfigRef:
             name: default
           forProvider:
+            source: Inline
+            vars:
+              - key: rancher_url
+                value: "https://rancher.129.212.193.105.nip.io"
+              - key: cluster_name
+                value: "rke2-do-cluster"
+              - key: kubernetes_version
+                value: "v1.32.4+rke2r1"
+              - key: region
+                value: "fra1"
+              - key: droplet_size
+                value: "s-4vcpu-8gb"
+              - key: cp_node_count
+                value: "1"
+              - key: worker_node_count
+                value: "2"
             env:
-              - name: RANCHER_URL
-                secretKeyRef:
-                  namespace: crossplane-system
-                  name: rancher-credentials
-                  key: url
-              - name: RANCHER_TOKEN_KEY
+              - name: TF_VAR_rancher_token
                 secretKeyRef:
                   namespace: crossplane-system
                   name: rancher-credentials
@@ -27,7 +38,6 @@ values:
                   namespace: crossplane-system
                   name: do-credentials
                   key: token
-            source: Inline
             module: |
               terraform {
                 required_providers {
@@ -36,43 +46,27 @@ values:
                     version = "~> 7.0"
                   }
                 }
+                backend "kubernetes" {
+                  secret_suffix     = "rke2-do-cluster"
+                  namespace         = "crossplane-system"
+                  in_cluster_config = true
+                }
               }
 
-              provider "rancher2" {}
+              variable "rancher_url" { type = string }
+              variable "rancher_token" { type = string; sensitive = true }
+              variable "do_token" { type = string; sensitive = true }
+              variable "cluster_name" { type = string }
+              variable "kubernetes_version" { type = string }
+              variable "region" { type = string }
+              variable "droplet_size" { type = string }
+              variable "cp_node_count" { type = number }
+              variable "worker_node_count" { type = number }
 
-              variable "do_token" {
-                type      = string
-                sensitive = true
-              }
-
-              variable "cluster_name" {
-                type    = string
-                default = "rke2-do-cluster"
-              }
-
-              variable "kubernetes_version" {
-                type    = string
-                default = "v1.32.4+rke2r1"
-              }
-
-              variable "region" {
-                type    = string
-                default = "fra1"
-              }
-
-              variable "droplet_size" {
-                type    = string
-                default = "s-4vcpu-8gb"
-              }
-
-              variable "cp_node_count" {
-                type    = number
-                default = 1
-              }
-
-              variable "worker_node_count" {
-                type    = number
-                default = 2
+              provider "rancher2" {
+                api_url   = var.rancher_url
+                token_key = var.rancher_token
+                insecure  = true
               }
 
               resource "rancher2_cloud_credential" "digitalocean" {
@@ -85,11 +79,11 @@ values:
               resource "rancher2_machine_config_v2" "control_plane" {
                 generate_name = "${var.cluster_name}-cp"
                 digitalocean_config {
-                  image   = "ubuntu-24-04-x64"
-                  region  = var.region
-                  size    = var.droplet_size
-                  tags    = "${var.cluster_name},control-plane"
-                  backups = false
+                  image      = "ubuntu-24-04-x64"
+                  region     = var.region
+                  size       = var.droplet_size
+                  tags       = "${var.cluster_name},control-plane"
+                  backups    = false
                   monitoring = true
                 }
               }
@@ -97,11 +91,11 @@ values:
               resource "rancher2_machine_config_v2" "worker" {
                 generate_name = "${var.cluster_name}-worker"
                 digitalocean_config {
-                  image   = "ubuntu-24-04-x64"
-                  region  = var.region
-                  size    = var.droplet_size
-                  tags    = "${var.cluster_name},worker"
-                  backups = false
+                  image      = "ubuntu-24-04-x64"
+                  region     = var.region
+                  size       = var.droplet_size
+                  tags       = "${var.cluster_name},worker"
+                  backups    = false
                   monitoring = true
                 }
               }
@@ -150,3 +144,6 @@ values:
               output "cluster_name" {
                 value = rancher2_cluster_v2.rke2.name
               }
+          writeConnectionSecretToRef:
+            namespace: crossplane-system
+            name: rke2-cluster-outputs
