@@ -14,7 +14,7 @@ spec:
           - path: "apps/bootstrap/**/*.yaml"
   template:
     metadata:
-      name: '{{ index .path.segments (sub (len .path.segments) 1) | strings.TrimSuffix ".yaml" }}'
+      name: '{{ trimSuffix ".yaml" .path.filename }}'
     spec:
       project: default
       source:
