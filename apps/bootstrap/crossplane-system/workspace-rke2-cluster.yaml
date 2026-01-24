@@ -33,7 +33,7 @@ values:
                 required_providers {
                   rancher2 = {
                     source  = "rancher/rancher2"
-                    version = "~> 4.2.0"
+                    version = "~> 7.0"
                   }
                 }
               }
@@ -85,7 +85,7 @@ values:
               resource "rancher2_machine_config_v2" "control_plane" {
                 generate_name = "${var.cluster_name}-cp"
                 digitalocean_config {
-                  image   = "ubuntu-22-04-x64"
+                  image   = "ubuntu-24-04-x64"
                   region  = var.region
                   size    = var.droplet_size
                   tags    = "${var.cluster_name},control-plane"
@@ -97,7 +97,7 @@ values:
               resource "rancher2_machine_config_v2" "worker" {
                 generate_name = "${var.cluster_name}-worker"
                 digitalocean_config {
-                  image   = "ubuntu-22-04-x64"
+                  image   = "ubuntu-24-04-x64"
                   region  = var.region
                   size    = var.droplet_size
                   tags    = "${var.cluster_name},worker"
