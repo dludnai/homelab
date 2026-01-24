@@ -154,6 +154,11 @@ values:
                       kind = rancher2_machine_config_v2.control_plane.kind
                       name = rancher2_machine_config_v2.control_plane.name
                     }
+
+                    rolling_update {
+                      max_surge       = "1"
+                      max_unavailable = "0"
+                    }
                   }
 
                   machine_pools {
@@ -168,6 +173,11 @@ values:
                     machine_config {
                       kind = rancher2_machine_config_v2.worker.kind
                       name = rancher2_machine_config_v2.worker.name
+                    }
+
+                    rolling_update {
+                      max_surge       = "1"
+                      max_unavailable = "0"
                     }
                   }
 
