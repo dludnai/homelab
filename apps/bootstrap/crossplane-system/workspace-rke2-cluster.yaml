@@ -26,7 +26,9 @@ values:
               - key: cp_node_count
                 value: "1"
               - key: worker_node_count
-                value: "2"
+                value: "1"
+              - key: ssh_key_fingerprint
+                value: "71:a5:ee:a9:8a:28:53:88:20:e7:13:94:c9:d8:a6:84"
             env:
               - name: TF_VAR_rancher_token
                 secretKeyRef:
@@ -91,6 +93,10 @@ values:
                 type = number
               }
 
+              variable "ssh_key_fingerprint" {
+                type = string
+              }
+
               provider "rancher2" {
                 api_url   = var.rancher_url
                 token_key = var.rancher_token
@@ -107,24 +113,26 @@ values:
               resource "rancher2_machine_config_v2" "control_plane" {
                 generate_name = "${var.cluster_name}-cp"
                 digitalocean_config {
-                  image      = "ubuntu-24-04-x64"
-                  region     = var.region
-                  size       = var.droplet_size
-                  tags       = "${var.cluster_name},control-plane"
-                  backups    = false
-                  monitoring = true
+                  image               = "ubuntu-24-04-x64"
+                  region              = var.region
+                  size                = var.droplet_size
+                  tags                = "${var.cluster_name},control-plane"
+                  backups             = false
+                  monitoring          = true
+                  ssh_key_fingerprint = var.ssh_key_fingerprint
                 }
               }
 
               resource "rancher2_machine_config_v2" "worker" {
                 generate_name = "${var.cluster_name}-worker"
                 digitalocean_config {
-                  image      = "ubuntu-24-04-x64"
-                  region     = var.region
-                  size       = var.droplet_size
-                  tags       = "${var.cluster_name},worker"
-                  backups    = false
-                  monitoring = true
+                  image               = "ubuntu-24-04-x64"
+                  region              = var.region
+                  size                = var.droplet_size
+                  tags                = "${var.cluster_name},worker"
+                  backups             = false
+                  monitoring          = true
+                  ssh_key_fingerprint = var.ssh_key_fingerprint
                 }
               }
 
