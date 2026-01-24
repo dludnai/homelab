@@ -3,6 +3,6 @@ chart: rancher
 version: 2.11.3
 values:
   hostname: rancher.129.212.193.105.nip.io
-  replicas: 1
+  replicas: 0
   ingress:
     ingressClassName: nginx
