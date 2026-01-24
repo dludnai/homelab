@@ -1,6 +1,6 @@
 url: https://stevehipwell.github.io/helm-charts
 chart: k8s-resources
-version: 3.2.0
+version: 0.1.0
 values:
   resources:
     - apiVersion: cert-manager.io/v1
