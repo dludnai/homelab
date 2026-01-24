@@ -1,0 +1,12 @@
+url: https://stevehipwell.github.io/helm-charts
+chart: k8s-resources
+version: 3.2.0
+values:
+  resources:
+    - apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: lab-ca-issuer
+      spec:
+        ca:
+          secretName: lab-ca

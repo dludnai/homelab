@@ -5,3 +5,15 @@ values:
   configs:
     params:
       server.insecure: true
+  server:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: lab-ca-issuer
+      hosts:
+        - argocd.129.212.193.105.nip.io
+      tls:
+        - secretName: argocd-tls
+          hosts:
+            - argocd.129.212.193.105.nip.io
