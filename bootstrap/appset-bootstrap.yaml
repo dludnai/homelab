@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bootstrap-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/dludnai/homelab.git
+        revision: HEAD
+        files:
+          - path: "apps/bootstrap/**/*.yaml"
+  template:
+    metadata:
+      name: '{{ index .path.segments (sub (len .path.segments) 1) | strings.TrimSuffix ".yaml" }}'
+    spec:
+      project: default
+      source:
+        repoURL: "{{.url}}"
+        chart: "{{.chart}}"
+        targetRevision: "{{.version}}"
+        helm:
+          valuesObject: |
+            {{.values | toJson}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 2 }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

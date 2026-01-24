@@ -1,0 +1,7 @@
+url: https://argoproj.github.io/argo-helm
+chart: argo-cd
+version: 7.8.13
+values:
+  configs:
+    params:
+      server.insecure: true
