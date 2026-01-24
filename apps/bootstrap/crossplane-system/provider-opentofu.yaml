@@ -9,9 +9,3 @@ values:
       content:
         spec:
           package: xpkg.upbound.io/upbound/provider-opentofu:v1.0.3
-    - apiVersion: opentofu.upbound.io/v1beta1
-      kind: ProviderConfig
-      name: default
-      content:
-        spec:
-          credentials: []
