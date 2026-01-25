@@ -8,4 +8,4 @@ values:
       name: provider-opentofu
       content:
         spec:
-          package: xpkg.upbound.io/upbound/provider-opentofu:v1.0.3
+          package: docker.io/dludnai/provider-opentofu:v1.0.3
