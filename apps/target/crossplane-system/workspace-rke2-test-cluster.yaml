@@ -11,6 +11,8 @@ values:
           providerConfigRef:
             name: default
           forProvider:
+            initArgs:
+              - "-upgrade=true"
             source: Inline
             vars:
               - key: rancher_url
