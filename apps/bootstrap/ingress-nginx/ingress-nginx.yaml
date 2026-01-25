@@ -3,6 +3,11 @@ chart: ingress-nginx
 version: 4.12.1
 values:
   controller:
+    image:
+      registry: docker.io
+      image: rancher/nginx-ingress-controller
+      tag: v1.12.6-hardened1
+      digest: ""
     service:
       type: NodePort
       nodePorts:
@@ -10,3 +15,10 @@ values:
         https: 30443
     ingressClassResource:
       default: true
+    admissionWebhooks:
+      patch:
+        image:
+          registry: docker.io
+          image: rancher/mirrored-ingress-nginx-kube-webhook-certgen
+          tag: v1.5.4
+          digest: ""
