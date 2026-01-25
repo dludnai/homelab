@@ -1,0 +1,11 @@
+url: https://stevehipwell.github.io/helm-charts
+chart: k8s-resources
+version: 0.1.0
+values:
+  resources:
+    - apiVersion: opentofu.upbound.io/v1beta1
+      kind: ProviderConfig
+      name: default
+      content:
+        spec:
+          credentials: []

@@ -1,0 +1,11 @@
+url: https://stevehipwell.github.io/helm-charts
+chart: k8s-resources
+version: 0.1.0
+values:
+  resources:
+    - apiVersion: pkg.crossplane.io/v1
+      kind: Provider
+      name: provider-opentofu
+      content:
+        spec:
+          package: docker.io/dludnai/provider-opentofu:v1.0.3
