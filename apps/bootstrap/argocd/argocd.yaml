@@ -3,7 +3,7 @@ chart: argo-cd
 version: 7.8.13
 values:
   global:
-    domain: argocd.129.212.193.105.nip.io
+    domain: argocd.209.38.182.94.nip.io
   configs:
     params:
       server.insecure: true
@@ -11,11 +11,3 @@ values:
     ingress:
       enabled: true
       ingressClassName: nginx
-      annotations:
-        cert-manager.io/cluster-issuer: lab-ca-issuer
-      hosts:
-        - argocd.129.212.193.105.nip.io
-      tls:
-        - secretName: argocd-tls
-          hosts:
-            - argocd.129.212.193.105.nip.io

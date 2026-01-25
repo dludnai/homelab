@@ -14,7 +14,7 @@ values:
             source: Inline
             vars:
               - key: rancher_url
-                value: "https://rancher.129.212.193.105.nip.io"
+                value: "https://rancher.209.38.182.94.nip.io"
               - key: cluster_name
                 value: "rke2-do-cluster"
               - key: kubernetes_version
