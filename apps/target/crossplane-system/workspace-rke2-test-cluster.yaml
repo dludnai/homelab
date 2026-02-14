@@ -16,7 +16,7 @@ values:
             source: Inline
             vars:
               - key: rancher_url
-                value: "https://rancher.129.212.195.186.nip.io"
+                value: "https://rancher.164.90.241.117.nip.io"
               - key: cluster_name
                 value: "rke2-test-cluster"
               - key: kubernetes_version
