@@ -15,23 +15,17 @@ values:
               - "-upgrade=true"
             source: Inline
             vars:
-              - key: rancher_url
-                value: "https://rancher.164.90.241.117.nip.io"
               - key: cluster_name
                 value: "rke2-test-cluster"
             env:
-              - name: TF_VAR_rancher_token
+              - name: TF_VAR_kube_config
                 secretKeyRef:
                   namespace: crossplane-system
-                  name: rancher-credentials
-                  key: token
+                  name: rke2-test-cluster-outputs
+                  key: kube_config
             module: |
               terraform {
                 required_providers {
-                  rancher2 = {
-                    source  = "rancher/rancher2"
-                    version = "~> 7.0"
-                  }
                   kubernetes = {
                     source  = "hashicorp/kubernetes"
                     version = "~> 2.0"
@@ -44,44 +38,27 @@ values:
                 }
               }
 
-              variable "rancher_url" {
-                type = string
-              }
-
-              variable "rancher_token" {
-                type      = string
-                sensitive = true
-              }
-
               variable "cluster_name" {
                 type = string
               }
 
-              provider "rancher2" {
-                api_url   = var.rancher_url
-                token_key = var.rancher_token
-                insecure  = true
+              variable "kube_config" {
+                type      = string
+                sensitive = true
               }
 
-              # Use in-cluster config for the kubernetes provider (target cluster where ArgoCD runs)
+              # In-cluster provider for creating ArgoCD secret on target cluster
               provider "kubernetes" {
                 config_path = ""
               }
 
-              # Look up the test cluster in Rancher
-              data "rancher2_cluster_v2" "test" {
-                name = var.cluster_name
-              }
-
-              # Extract server URL and token from the kubeconfig
               locals {
-                kube_config = yamldecode(data.rancher2_cluster_v2.test.kube_config)
-                server      = local.kube_config.clusters[0].cluster.server
-                ca_data     = try(local.kube_config.clusters[0].cluster["certificate-authority-data"], "")
-                token       = local.kube_config.users[0].user.token
+                parsed    = yamldecode(var.kube_config)
+                server    = local.parsed.clusters[0].cluster.server
+                ca_data   = try(local.parsed.clusters[0].cluster["certificate-authority-data"], "")
+                token     = local.parsed.users[0].user.token
               }
 
-              # Create ArgoCD cluster secret on the target cluster
               resource "kubernetes_secret_v1" "argocd_cluster" {
                 metadata {
                   name      = var.cluster_name
@@ -90,9 +67,7 @@ values:
                     "argocd.argoproj.io/secret-type" = "cluster"
                   }
                 }
-
                 type = "Opaque"
-
                 data = {
                   name   = var.cluster_name
                   server = local.server
