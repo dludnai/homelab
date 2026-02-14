@@ -38,8 +38,9 @@ values:
                 - /bin/sh
                 - -c
                 - |
+                  MAX_ROWS=500
                   i=0
-                  while true; do
+                  while [ "$i" -lt "$MAX_ROWS" ]; do
                     i=$((i + 1))
                     ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
@@ -54,6 +55,8 @@ values:
 
                     sleep 5
                   done
+                  echo "Reached $MAX_ROWS rows, sleeping forever"
+                  sleep infinity
               volumeMounts:
                 - name: data
                   mountPath: /data
