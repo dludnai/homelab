@@ -26,9 +26,9 @@ values:
               - key: droplet_size
                 value: "s-4vcpu-8gb"
               - key: cp_node_count
-                value: "1"
+                value: "3"
               - key: worker_node_count
-                value: "1"
+                value: "2"
               - key: ssh_key_fingerprint
                 value: "71:a5:ee:a9:8a:28:53:88:20:e7:13:94:c9:d8:a6:84"
             env:
