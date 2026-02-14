@@ -26,9 +26,14 @@ values:
                 - name: PGHOST
                   value: dr-test-pg-rw.cnpg-system.svc.cluster.local
                 - name: PGUSER
-                  value: postgres
+                  value: app
                 - name: PGDATABASE
-                  value: postgres
+                  value: app
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: dr-test-pg-app
+                      key: password
               command:
                 - /bin/sh
                 - -c

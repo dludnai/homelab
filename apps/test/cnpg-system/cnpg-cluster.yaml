@@ -28,5 +28,12 @@ values:
               memory: "1Gi"
               cpu: "1"
 
+          bootstrap:
+            initdb:
+              database: app
+              owner: app
+              postInitApplicationSQL:
+                - CREATE TABLE IF NOT EXISTS dr_test (id SERIAL PRIMARY KEY, data TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW())
+
           monitoring:
             enablePodMonitor: false
