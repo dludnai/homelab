@@ -82,7 +82,8 @@ values:
               }
 
               output "cluster_server" {
-                value = local.server
+                value     = local.server
+                sensitive = true
               }
           writeConnectionSecretToRef:
             namespace: crossplane-system
