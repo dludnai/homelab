@@ -1,6 +1,6 @@
 url: https://releases.rancher.com/server-charts/stable
 chart: rancher
-version: 2.12.3
+version: 2.11.3
 values:
   hostname: rancher.164.90.241.117.nip.io
   replicas: 1
