@@ -1,0 +1,7 @@
+url: https://charts.longhorn.io
+chart: longhorn
+version: 1.8.1
+values:
+  defaultSettings:
+    backupTarget: s3://dludnai-rancher-backups-fra1@fra1/longhorn-backups
+    backupTargetCredentialSecret: longhorn-s3-secret

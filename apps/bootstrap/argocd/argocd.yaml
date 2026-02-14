@@ -3,7 +3,7 @@ chart: argo-cd
 version: 7.8.13
 values:
   global:
-    domain: argocd.209.38.182.94.nip.io
+    domain: argocd.143.244.206.37.nip.io
   configs:
     params:
       server.insecure: true

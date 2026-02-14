@@ -20,7 +20,7 @@ values:
               - key: cluster_name
                 value: "rke2-test-cluster"
               - key: kubernetes_version
-                value: "v1.33.1+rke2r1"
+                value: "v1.32.4+rke2r1"
               - key: region
                 value: "fra1"
               - key: droplet_size

@@ -2,7 +2,7 @@ url: https://releases.rancher.com/server-charts/stable
 chart: rancher
 version: 2.11.3
 values:
-  hostname: rancher.209.38.182.94.nip.io
-  replicas: 0
+  hostname: rancher.143.244.206.37.nip.io
+  replicas: 1
   ingress:
     ingressClassName: nginx
