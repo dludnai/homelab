@@ -1,0 +1,114 @@
+url: https://stevehipwell.github.io/helm-charts
+chart: k8s-resources
+version: 0.1.0
+values:
+  resources:
+    - apiVersion: opentofu.upbound.io/v1beta1
+      kind: Workspace
+      name: argocd-register-test-cluster
+      content:
+        spec:
+          providerConfigRef:
+            name: default
+          forProvider:
+            initArgs:
+              - "-upgrade=true"
+            source: Inline
+            vars:
+              - key: rancher_url
+                value: "https://rancher.164.90.241.117.nip.io"
+              - key: cluster_name
+                value: "rke2-test-cluster"
+            env:
+              - name: TF_VAR_rancher_token
+                secretKeyRef:
+                  namespace: crossplane-system
+                  name: rancher-credentials
+                  key: token
+            module: |
+              terraform {
+                required_providers {
+                  rancher2 = {
+                    source  = "rancher/rancher2"
+                    version = "~> 7.0"
+                  }
+                  kubernetes = {
+                    source  = "hashicorp/kubernetes"
+                    version = "~> 2.0"
+                  }
+                }
+                backend "kubernetes" {
+                  secret_suffix     = "argocd-register-test-cluster"
+                  namespace         = "crossplane-system"
+                  in_cluster_config = true
+                }
+              }
+
+              variable "rancher_url" {
+                type = string
+              }
+
+              variable "rancher_token" {
+                type      = string
+                sensitive = true
+              }
+
+              variable "cluster_name" {
+                type = string
+              }
+
+              provider "rancher2" {
+                api_url   = var.rancher_url
+                token_key = var.rancher_token
+                insecure  = true
+              }
+
+              # Use in-cluster config for the kubernetes provider (target cluster where ArgoCD runs)
+              provider "kubernetes" {
+                config_path = ""
+              }
+
+              # Look up the test cluster in Rancher
+              data "rancher2_cluster_v2" "test" {
+                name = var.cluster_name
+              }
+
+              # Extract server URL and token from the kubeconfig
+              locals {
+                kube_config = yamldecode(data.rancher2_cluster_v2.test.kube_config)
+                server      = local.kube_config.clusters[0].cluster.server
+                ca_data     = try(local.kube_config.clusters[0].cluster["certificate-authority-data"], "")
+                token       = local.kube_config.users[0].user.token
+              }
+
+              # Create ArgoCD cluster secret on the target cluster
+              resource "kubernetes_secret_v1" "argocd_cluster" {
+                metadata {
+                  name      = var.cluster_name
+                  namespace = "argocd"
+                  labels = {
+                    "argocd.argoproj.io/secret-type" = "cluster"
+                  }
+                }
+
+                type = "Opaque"
+
+                data = {
+                  name   = var.cluster_name
+                  server = local.server
+                  config = jsonencode({
+                    bearerToken = local.token
+                    tlsClientConfig = {
+                      insecure = local.ca_data == "" ? true : false
+                      caData   = local.ca_data
+                    }
+                  })
+                }
+              }
+
+              output "cluster_server" {
+                value = local.server
+              }
+          writeConnectionSecretToRef:
+            namespace: crossplane-system
+            name: argocd-register-test-cluster-outputs

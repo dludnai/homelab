@@ -1,0 +1,32 @@
+url: https://stevehipwell.github.io/helm-charts
+chart: k8s-resources
+version: 0.1.0
+values:
+  resources:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      name: dr-test-pg
+      content:
+        spec:
+          instances: 3
+          primaryUpdateStrategy: unsupervised
+
+          postgresql:
+            parameters:
+              shared_buffers: "256MB"
+              effective_cache_size: "512MB"
+
+          storage:
+            storageClass: longhorn-dr
+            size: 5Gi
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+
+          monitoring:
+            enablePodMonitor: false

@@ -1,0 +1,206 @@
+url: https://stevehipwell.github.io/helm-charts
+chart: k8s-resources
+version: 0.1.0
+values:
+  resources:
+    - apiVersion: opentofu.upbound.io/v1beta1
+      kind: Workspace
+      name: rke2-test-cluster
+      content:
+        spec:
+          providerConfigRef:
+            name: default
+          forProvider:
+            initArgs:
+              - "-upgrade=true"
+            source: Inline
+            vars:
+              - key: rancher_url
+                value: "https://rancher.164.90.241.117.nip.io"
+              - key: cluster_name
+                value: "rke2-test-cluster"
+              - key: kubernetes_version
+                value: "v1.32.4+rke2r1"
+              - key: region
+                value: "fra1"
+              - key: droplet_size
+                value: "s-4vcpu-8gb"
+              - key: cp_node_count
+                value: "1"
+              - key: worker_node_count
+                value: "1"
+              - key: ssh_key_fingerprint
+                value: "71:a5:ee:a9:8a:28:53:88:20:e7:13:94:c9:d8:a6:84"
+            env:
+              - name: TF_VAR_rancher_token
+                secretKeyRef:
+                  namespace: crossplane-system
+                  name: rancher-credentials
+                  key: token
+              - name: TF_VAR_do_token
+                secretKeyRef:
+                  namespace: crossplane-system
+                  name: do-credentials
+                  key: token
+            module: |
+              terraform {
+                required_providers {
+                  rancher2 = {
+                    source  = "rancher/rancher2"
+                    version = "~> 7.0"
+                  }
+                }
+                backend "kubernetes" {
+                  secret_suffix     = "rke2-test-cluster"
+                  namespace         = "crossplane-system"
+                  in_cluster_config = true
+                }
+              }
+
+              variable "rancher_url" {
+                type = string
+              }
+
+              variable "rancher_token" {
+                type      = string
+                sensitive = true
+              }
+
+              variable "do_token" {
+                type      = string
+                sensitive = true
+              }
+
+              variable "cluster_name" {
+                type = string
+              }
+
+              variable "kubernetes_version" {
+                type = string
+              }
+
+              variable "region" {
+                type = string
+              }
+
+              variable "droplet_size" {
+                type = string
+              }
+
+              variable "cp_node_count" {
+                type = number
+              }
+
+              variable "worker_node_count" {
+                type = number
+              }
+
+              variable "ssh_key_fingerprint" {
+                type = string
+              }
+
+              provider "rancher2" {
+                api_url   = var.rancher_url
+                token_key = var.rancher_token
+                insecure  = true
+              }
+
+              resource "rancher2_cloud_credential" "digitalocean" {
+                name = "${var.cluster_name}-do-creds"
+                digitalocean_credential_config {
+                  access_token = var.do_token
+                }
+              }
+
+              resource "rancher2_machine_config_v2" "control_plane" {
+                generate_name = "${var.cluster_name}-cp"
+                digitalocean_config {
+                  image               = "ubuntu-24-04-x64"
+                  region              = var.region
+                  size                = var.droplet_size
+                  tags                = "${var.cluster_name},control-plane"
+                  backups             = false
+                  monitoring          = true
+                  ssh_key_fingerprint = var.ssh_key_fingerprint
+                }
+              }
+
+              resource "rancher2_machine_config_v2" "worker" {
+                generate_name = "${var.cluster_name}-worker"
+                digitalocean_config {
+                  image               = "ubuntu-24-04-x64"
+                  region              = var.region
+                  size                = var.droplet_size
+                  tags                = "${var.cluster_name},worker"
+                  backups             = false
+                  monitoring          = true
+                  ssh_key_fingerprint = var.ssh_key_fingerprint
+                }
+              }
+
+              resource "rancher2_cluster_v2" "rke2" {
+                name               = var.cluster_name
+                kubernetes_version = var.kubernetes_version
+
+                rke_config {
+                  machine_pools {
+                    name                         = "control-plane"
+                    cloud_credential_secret_name = rancher2_cloud_credential.digitalocean.id
+                    control_plane_role           = true
+                    etcd_role                    = true
+                    worker_role                  = false
+                    quantity                     = var.cp_node_count
+                    drain_before_delete          = true
+
+                    machine_config {
+                      kind = rancher2_machine_config_v2.control_plane.kind
+                      name = rancher2_machine_config_v2.control_plane.name
+                    }
+
+                    rolling_update {
+                      max_surge       = "1"
+                      max_unavailable = "0"
+                    }
+                  }
+
+                  machine_pools {
+                    name                         = "worker"
+                    cloud_credential_secret_name = rancher2_cloud_credential.digitalocean.id
+                    control_plane_role           = false
+                    etcd_role                    = false
+                    worker_role                  = true
+                    quantity                     = var.worker_node_count
+                    drain_before_delete          = true
+
+                    machine_config {
+                      kind = rancher2_machine_config_v2.worker.kind
+                      name = rancher2_machine_config_v2.worker.name
+                    }
+
+                    rolling_update {
+                      max_surge       = "1"
+                      max_unavailable = "0"
+                    }
+                  }
+
+                  machine_global_config = yamlencode({
+                    cni = "cilium"
+                  })
+                }
+              }
+
+              output "cluster_id" {
+                value = rancher2_cluster_v2.rke2.id
+              }
+
+              output "cluster_name" {
+                value = rancher2_cluster_v2.rke2.name
+              }
+
+              output "kube_config" {
+                value     = rancher2_cluster_v2.rke2.kube_config
+                sensitive = true
+              }
+          writeConnectionSecretToRef:
+            namespace: crossplane-system
+            name: rke2-test-cluster-outputs

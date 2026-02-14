@@ -1,0 +1,59 @@
+url: https://stevehipwell.github.io/helm-charts
+chart: k8s-resources
+version: 0.1.0
+values:
+  resources:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: dr-test-pvc
+      content:
+        spec:
+          storageClassName: longhorn-dr
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - apiVersion: v1
+      kind: Pod
+      name: dr-writer
+      content:
+        spec:
+          containers:
+            - name: writer
+              image: postgres:16-alpine
+              env:
+                - name: PGHOST
+                  value: dr-test-pg-rw.cnpg-system.svc.cluster.local
+                - name: PGUSER
+                  value: postgres
+                - name: PGDATABASE
+                  value: postgres
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  i=0
+                  while true; do
+                    i=$((i + 1))
+                    ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+                    # Write to Longhorn volume
+                    echo "$i,$ts,alive" >> /data/log.txt
+                    echo "Written row $i at $ts to file"
+
+                    # Write to PostgreSQL (if available)
+                    psql -c "INSERT INTO dr_test (data) VALUES ('writer-row-$i-$ts');" 2>/dev/null \
+                      && echo "Written row $i at $ts to PostgreSQL" \
+                      || echo "PostgreSQL not available, skipping DB write"
+
+                    sleep 5
+                  done
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: dr-test-pvc
+          restartPolicy: Always

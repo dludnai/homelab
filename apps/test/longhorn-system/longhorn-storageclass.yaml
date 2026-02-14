@@ -1,0 +1,19 @@
+url: https://stevehipwell.github.io/helm-charts
+chart: k8s-resources
+version: 0.1.0
+values:
+  resources:
+    - apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      name: longhorn-dr
+      content:
+        provisioner: driver.longhorn.io
+        allowVolumeExpansion: true
+        reclaimPolicy: Retain
+        volumeBindingMode: Immediate
+        parameters:
+          numberOfReplicas: "2"
+          staleReplicaTimeout: "2880"
+          fromBackup: ""
+          fsType: "ext4"
+          dataLocality: "disabled"
