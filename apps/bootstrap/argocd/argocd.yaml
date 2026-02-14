@@ -1,6 +1,6 @@
 url: https://argoproj.github.io/argo-helm
 chart: argo-cd
-version: 7.8.26
+version: 9.4.2
 values:
   global:
     domain: argocd.143.244.206.37.nip.io
